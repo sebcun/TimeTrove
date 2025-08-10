@@ -1,0 +1,67 @@
+<h1
+  class="text-4xl md:text-6xl font-extrabold mb-1 text-center text-[#ffd036] dark:text-[#ffd036]"
+>
+  {{CAPSULENAME}}
+</h1>
+<h6
+  class="text-lg md:text-lg font-medium mb-1 text-center text-[#000000] dark:text-gray-300"
+>
+  This capsule was sealed on the
+  <span
+    class="font-extrabold"
+    id="sealedAt"
+    data-createdat="{{ CREATEDAT }}"
+  ></span>
+  and opened on the
+  <span
+    class="font-extrabold"
+    id="openedAt"
+    data-readyat="{{ READYAT }}"
+  ></span>
+</h6>
+<h1
+  class="text-l md:text-l font-medium mb-6 text-center text-[#000000] dark:text-gray-300 mx-14"
+>
+  {{CAPSULEDESCRIPTION}}
+</h1>
+
+<script>
+  function formatUnixTimestamp(ts) {
+    const dt = new Date(ts * 1000);
+
+    const day = dt.getDate();
+    const suffix =
+      day >= 11 && day <= 13
+        ? "th"
+        : day % 10 === 1
+        ? "st"
+        : day % 10 === 2
+        ? "nd"
+        : day % 10 === 3
+        ? "rd"
+        : "th";
+
+    const month = dt.toLocaleString("en-US", { month: "long" });
+    const year = dt.getFullYear();
+
+    let hours = dt.getHours();
+    const minutes = dt.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+
+    return `${day}${suffix} ${month} ${year} at ${hours}:${minutes}${ampm}`;
+  }
+
+  function loadDates() {
+    const sealedAtElem = document.getElementById("sealedAt");
+    const openedAtElem = document.getElementById("openedAt");
+
+    const sealedAt = parseInt(sealedAtElem.dataset.createdat);
+    const openedAt = parseInt(openedAtElem.dataset.readyat);
+
+    sealedAtElem.textContent = formatUnixTimestamp(sealedAt);
+    openedAtElem.textContent = formatUnixTimestamp(openedAt);
+  }
+
+  document.addEventListener("DOMContentLoaded", loadDates);
+</script>

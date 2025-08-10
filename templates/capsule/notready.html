@@ -1,0 +1,52 @@
+<h1
+  class="text-4xl md:text-6xl font-extrabold mb-6 text-center text-[#000000] dark:text-gray-300"
+>
+  Capsule Opens In
+</h1>
+<h1
+  class="text-4xl md:text-6xl font-extrabold mb-6 text-center text-[#ffd036] dark:text-[#ffd036]"
+  data-readyat="{{ READYAT }}"
+  id="countdown"
+>
+  Loading...
+</h1>
+<a
+  href="/"
+  class="px-6 py-3 rounded-lg bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition"
+  >Back Home</a
+>
+<script>
+  function formatTime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const minutes = Math.floor(seconds / 60);
+    seconds %= 60;
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  function startCountdown() {
+    const countdownElem = document.getElementById("countdown");
+    if (!countdownElem) return;
+
+    const readyAt = parseInt(countdownElem.dataset.readyat) * 1000;
+    function updateCountdown() {
+      const now = Date.now();
+      const diff = Math.floor((readyAt - now) / 1000);
+
+      if (diff <= 0) {
+        countdownElem.textContent = "Capsule is ready!";
+        clearInterval(intervalId);
+        return;
+      }
+
+      countdownElem.textContent = formatTime(diff);
+    }
+
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 1000);
+  }
+
+  document.addEventListener("DOMContentLoaded", startCountdown);
+</script>

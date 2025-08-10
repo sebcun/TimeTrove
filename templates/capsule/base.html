@@ -1,0 +1,4 @@
+{% extends 'base.html' %} {% block title %} Capsule {% endblock %} {% block
+content %} {% if NOTFOUND %} {% include 'capsule/notfound.html' %} {% else %} {%
+if READY %} {% include 'capsule/ready.html' %} {% else %} {% include
+'capsule/notready.html' %} {% endif %} {% endif %} {% endblock %}

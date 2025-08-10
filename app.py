@@ -48,7 +48,8 @@ def create():
             "name": capsuleName,
             "description": capsuleDescription,
             "readyAt": unixReadyAt,
-            "contents": capsuleContents        
+            "createdAt": int(time()),
+            "contents": capsuleContents
         }
 
         if os.path.exists(CAPSULES_JSON):
@@ -67,20 +68,20 @@ def create():
 @app.route('/capsule/<capsuleID>')
 def viewCapsule(capsuleID):
     if not os.path.exists(CAPSULES_JSON):
-        return "Capsule not found", 404
+        return render_template('capsule/base.html', NOTFOUND=True)
     with open (CAPSULES_JSON, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     # Find Capsule
     capsule = next((c for c in data if c['id']==capsuleID), None)
     if not capsule:
-        return "Capsule not found", 404
+        return render_template('capsule/base.html', NOTFOUND=True)
     
     isReady = capsule['readyAt'] <= int(time())
     if isReady:
-        return capsuleID
+        return render_template('capsule/base.html', NOTFOUND=False, READY=True, CAPSULENAME=capsule['name'], CAPSULEDESCRIPTION=capsule['description'], CAPSULECONTENTS=capsule['contents'], READYAT=capsule['readyAt'], CREATEDAT=capsule['createdAt'])
     else:
-        return str(capsule['readyAt'])
+        return render_template('capsule/base.html', NOTFOUND=False, READY=False, READYAT=capsule['readyAt'])
 
 
 if __name__ == '__main__':
