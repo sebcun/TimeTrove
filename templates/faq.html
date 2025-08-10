@@ -19,7 +19,9 @@
 </style>
 
 <!-- FAQs -->
-<div class="w-[70rem] mx-auto space-y-4">
+<div
+  class="w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-4"
+>
   <!-- What is TimeTrove? -->
   <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
     <button
@@ -48,7 +50,7 @@
     </div>
   </div>
 
-  <!-- FAQ Item 2 -->
+  <!-- How do I create a time capsule? -->
   <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
     <button
       type="button"
@@ -75,7 +77,7 @@
     </div>
   </div>
 
-  <!-- FAQ Item 3 -->
+  <!-- Is my data private and secure? -->
   <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
     <button
       type="button"
@@ -100,6 +102,34 @@
       All time capsules are encrypted automatically once created. There is no
       way of deleting a time capsule, or viewing the contents until the timer
       has elapsed.
+    </div>
+  </div>
+
+  <!-- How do I open a time capsule early? -->
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <button
+      type="button"
+      class="w-full flex justify-between items-center px-6 py-4 text-lg font-semibold text-left text-gray-800 dark:text-gray-200 focus:outline-none faq-toggle"
+    >
+      How do I open a time capsule early?
+      <svg
+        class="w-5 h-5 transition-transform duration-200 faq-arrow"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </button>
+    <div class="faq-answer px-6 text-gray-600 dark:text-gray-300">
+      <span class="font-bold">You don't.</span> Once a time capsule has been
+      created, it cannot be opened until the open date and time has been
+      reached, even by the capsule's owner!
     </div>
   </div>
 </div>

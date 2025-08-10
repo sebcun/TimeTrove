@@ -1,0 +1,486 @@
+{% extends 'base.html' %} {% block title %}Create{% endblock %} {% block content
+%}
+<h1
+  class="text-4xl font-extrabold mb-8 text-center text-[#000000] dark:text-gray-300"
+>
+  Create a new <span class="text-[#ffd036]">Time Capsule</span>
+</h1>
+
+<form class="w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto">
+  <!-- Capsule Details -->
+  <h1
+    class="text-xl font-extrabold text-center text-[#000000] dark:text-gray-300"
+  >
+    Capsule Details
+  </h1>
+  <!-- Capsule Name -->
+  <div class="col-span-full mb-2">
+    <label for="capsuleName" class="block text-sm/6 font-medium text-white"
+      >Capsule Name</label
+    >
+    <div class="mt-2 relative w-full">
+      <input
+        id="capsuleName"
+        type="text"
+        name="capsuleName"
+        maxlength="35"
+        class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+        oninput="document.getElementById('capsuleName-charCount').textContent = this.value.length + '/35';"
+      />
+      <span
+        id="capsuleName-charCount"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-base text-gray-400 select-none sm:text-sm/6 pointer-events-none"
+        >0/35</span
+      >
+    </div>
+  </div>
+  <!-- Capsule Description -->
+  <div class="col-span-full mb-6">
+    <label
+      for="capsuleDescription"
+      class="block text-sm/6 font-medium text-white"
+      >Capsule Description</label
+    >
+    <div class="mt-2 relative w-full">
+      <textarea
+        id="capsuleDescription"
+        name="capsuleDescription"
+        maxlength="250"
+        rows="4"
+        style="min-height: 80px; max-height: 200px; resize: vertical"
+        class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+        oninput="document.getElementById('capsuleDescription-charCount').textContent = this.value.length + '/250';"
+      ></textarea>
+      <span
+        id="capsuleDescription-charCount"
+        class="absolute right-3 bottom-2 text-base text-gray-400 select-none sm:text-sm/6 pointer-events-none"
+        style="right: 0.75rem; bottom: 0.5rem"
+        >0/250</span
+      >
+    </div>
+  </div>
+
+  <!-- When to Open Capsule -->
+  <h1
+    class="text-xl font-extrabold text-center text-[#000000] dark:text-gray-300"
+  >
+    When to Open Capsule
+  </h1>
+  <!-- Select Time -->
+  <div class="col-span-full mb-2">
+    <label for="capsuleTime" class="block text-sm/6 font-medium text-white"
+      >Select Time</label
+    >
+    <div class="mt-2 relative w-full">
+      <input
+        id="capsuleTime"
+        type="time"
+        name="capsuleTime"
+        value="09:00"
+        class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+      />
+    </div>
+  </div>
+  <!-- Select Date -->
+  <div class="col-span-full mb-6">
+    <label for="capsuleDate" class="block text-sm/6 font-medium text-white"
+      >Select Date</label
+    >
+    <div class="mt-2 relative w-full">
+      <input
+        id="capsuleDate"
+        type="date"
+        name="capsuleDate"
+        class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+        required
+      />
+    </div>
+  </div>
+
+  <!-- Capsule Contents -->
+  <h1
+    class="text-xl font-extrabold text-center text-[#000000] dark:text-gray-300"
+  >
+    Capsule Contents
+  </h1>
+  <div class="flex justify-center mt-2">
+    <button
+      id="openDialogBtn"
+      type="button"
+      class="px-6 py-2 rounded-lg bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition"
+    >
+      Add Content
+    </button>
+  </div>
+  <div id="capsuleContentsHolder"></div>
+
+  <div class="mt-8"></div>
+  <div class="flex justify-center mt-2">
+    <button
+      id="createTimeCapsuleBtn"
+      type="button"
+      class="px-12 py-3 rounded-lg bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition"
+    >
+      Create Time Capsule
+    </button>
+  </div>
+</form>
+
+<!-- Add Capsule Content Modal -->
+<el-dialog>
+  <dialog
+    id="dialog"
+    aria-labelledby="dialog-title"
+    class="fade-dialog fixed inset-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent backdrop:bg-transparent"
+  >
+    <el-dialog-backdrop
+      class="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+    ></el-dialog-backdrop>
+
+    <div
+      tabindex="0"
+      class="flex min-h-full items-end justify-center p-4 text-center focus:outline-none sm:items-center sm:p-0"
+    >
+      <el-dialog-panel
+        class="relative transform overflow-hidden rounded-lg bg-white dark:bg-[#1c1c1c] text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+      >
+        <div class="bg-white dark:bg-[#1c1c1c] px-6 pt-7 pb-6 sm:p-8 sm:pb-6">
+          <h3
+            id="dialog-title"
+            class="text-base font-semibold text-[#000000] dark:text-gray-300 mb-4"
+          >
+            What do you want to add to your time capsule?
+          </h3>
+          <div class="grid grid-cols-2 gap-5">
+            <button
+              type="button"
+              class="card-option rounded-xl border border-gray-300 dark:border-gray-700 p-6 bg-white dark:bg-[#232323] hover:bg-gray-100 dark:hover:bg-[#292929] transition flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-[#ffd036] focus:border-[#ffd036]"
+              data-card="timeCapsuleAdd-text"
+            >
+              <i
+                class="bi bi-card-text text-3xl mb-2 text-[#000000] dark:text-gray-200"
+              ></i>
+              <span
+                class="block text-lg font-bold text-[#000000] dark:text-gray-200"
+                >Text</span
+              >
+            </button>
+            <button
+              type="button"
+              class="card-option rounded-xl border border-gray-300 dark:border-gray-700 p-6 bg-white dark:bg-[#232323] hover:bg-gray-100 dark:hover:bg-[#292929] transition flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-[#ffd036] focus:border-[#ffd036]"
+              data-card="timeCapsuleAdd-image"
+            >
+              <i
+                class="bi bi-image text-3xl mb-2 text-[#000000] dark:text-gray-200"
+              ></i>
+              <span
+                class="block text-lg font-bold text-[#000000] dark:text-gray-200"
+                >Image</span
+              >
+            </button>
+            <button
+              type="button"
+              class="card-option rounded-xl border border-gray-300 dark:border-gray-700 p-6 bg-white dark:bg-[#232323] hover:bg-gray-100 dark:hover:bg-[#292929] transition flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-[#ffd036] focus:border-[#ffd036]"
+              data-card="timeCapsuleAdd-file"
+            >
+              <i
+                class="bi bi-file-earmark text-3xl mb-2 text-[#000000] dark:text-gray-200"
+              ></i>
+              <span
+                class="block text-lg font-bold text-[#000000] dark:text-gray-200"
+                >File</span
+              >
+            </button>
+            <button
+              type="button"
+              class="card-option rounded-xl border border-gray-300 dark:border-gray-700 p-6 bg-white dark:bg-[#232323] hover:bg-gray-100 dark:hover:bg-[#292929] transition flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-[#ffd036] focus:border-[#ffd036]"
+              data-card="timeCapsuleAdd-link"
+            >
+              <i
+                class="bi bi-link-45deg text-3xl mb-2 text-[#000000] dark:text-gray-200"
+              ></i>
+              <span
+                class="block text-lg font-bold text-[#000000] dark:text-gray-200"
+                >Link</span
+              >
+            </button>
+          </div>
+        </div>
+      </el-dialog-panel>
+    </div>
+  </dialog>
+</el-dialog>
+
+<!-- Hide Clock Icon -->
+<style>
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  input[type="time"]::-moz-focus-inner {
+    border: 0;
+  }
+
+  input[type="time"]::-ms-clear {
+    display: none;
+  }
+</style>
+
+<!-- Optimized: Default Date (+1 from today) and Capsule Content Modal -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Set default date to tomorrow
+    const dateInput = document.getElementById("capsuleDate");
+    if (dateInput) {
+      const today = new Date();
+      today.setDate(today.getDate() + 1);
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Modal logic
+    const openBtn = document.getElementById("openDialogBtn");
+    const dialog = document.getElementById("dialog");
+    const dialogPanel = dialog?.querySelector("el-dialog-panel");
+    const cardOptions = document.querySelectorAll(".card-option");
+    const contentsHolder = document.getElementById("capsuleContentsHolder");
+    let modalFormContainer = null;
+
+    // Utility: clear modal form
+    function clearModalForm() {
+      if (modalFormContainer) {
+        modalFormContainer.remove();
+        modalFormContainer = null;
+      }
+    }
+
+    // Utility: highlight selected card
+    function highlightCard(type) {
+      cardOptions.forEach((btn) => {
+        if (btn.getAttribute("data-card") === type) {
+          btn.classList.add(
+            "ring-2",
+            "ring-[#ffd036]",
+            "border-[#ffd036]",
+            "bg-[#fff7e0]",
+            "dark:bg-[#3a2f13]"
+          );
+        } else {
+          btn.classList.remove(
+            "ring-2",
+            "ring-[#ffd036]",
+            "border-[#ffd036]",
+            "bg-[#fff7e0]",
+            "dark:bg-[#3a2f13]"
+          );
+        }
+      });
+    }
+
+    // Utility: close dialog with fade
+    function closeDialogWithFade() {
+      highlightCard(null);
+      dialog.classList.remove("visible");
+      setTimeout(() => {
+        dialog.close();
+      }, 300);
+    }
+
+    // Show content form for selected type
+    function showContentForm(type) {
+      clearModalForm();
+      highlightCard(type);
+      modalFormContainer = document.createElement("div");
+      let formHtml = "";
+      if (type === "timeCapsuleAdd-text") {
+        formHtml = `
+          <div class="px-4 pb-4">
+            <label class="block text-sm font-medium text-[#000000] dark:text-gray-200 mb-1">Text Content</label>
+            <textarea id="capsuleContentText" rows="3" maxlength="500" class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-base text-[#000000] dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-500 transition mb-2" placeholder="Enter your message..."></textarea>
+            <div class="flex justify-end gap-2">
+              <button type="button" class="px-4 py-1.5 rounded bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-400 dark:hover:bg-gray-600 transition" id="cancelContentBtn">Cancel</button>
+              <button type="button" class="px-4 py-1.5 rounded bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition" id="addContentBtn">Add</button>
+            </div>
+          </div>
+        `;
+      } else if (type === "timeCapsuleAdd-image") {
+        formHtml = `
+          <div class="px-4 pb-4">
+            <label class="block text-sm font-medium text-[#000000] dark:text-gray-200 mb-1">Image Upload</label>
+            <input type="file" accept="image/*" id="capsuleContentImage" class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-base text-[#000000] dark:text-gray-200 focus:outline-2 focus:outline-indigo-500 transition mb-2" />
+            <div class="flex justify-end gap-2">
+              <button type="button" class="px-4 py-1.5 rounded bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-400 dark:hover:bg-gray-600 transition" id="cancelContentBtn">Cancel</button>
+              <button type="button" class="px-4 py-1.5 rounded bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition" id="addContentBtn">Add</button>
+            </div>
+          </div>
+        `;
+      } else if (type === "timeCapsuleAdd-file") {
+        formHtml = `
+          <div class="px-4 pb-4">
+            <label class="block text-sm font-medium text-[#000000] dark:text-gray-200 mb-1">File Upload</label>
+            <input type="file" id="capsuleContentFile" class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-base text-[#000000] dark:text-gray-200 focus:outline-2 focus:outline-indigo-500 transition mb-2" />
+            <div class="flex justify-end gap-2">
+              <button type="button" class="px-4 py-1.5 rounded bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-400 dark:hover:bg-gray-600 transition" id="cancelContentBtn">Cancel</button>
+              <button type="button" class="px-4 py-1.5 rounded bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition" id="addContentBtn">Add</button>
+            </div>
+          </div>
+        `;
+      } else if (type === "timeCapsuleAdd-link") {
+        formHtml = `
+          <div class="px-4 pb-4">
+            <label class="block text-sm font-medium text-[#000000] dark:text-gray-200 mb-1">Link</label>
+            <input type="url" id="capsuleContentLink" maxlength="300" placeholder="https://example.com" class="block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-base text-[#000000] dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-500 transition mb-2" />
+            <div class="flex justify-end gap-2">
+              <button type="button" class="px-4 py-1.5 rounded bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-400 dark:hover:bg-gray-600 transition" id="cancelContentBtn">Cancel</button>
+              <button type="button" class="px-4 py-1.5 rounded bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition" id="addContentBtn">Add</button>
+            </div>
+          </div>
+        `;
+      }
+      modalFormContainer.innerHTML = formHtml;
+      dialogPanel.appendChild(modalFormContainer);
+
+      // Cancel button
+      modalFormContainer.querySelector("#cancelContentBtn").onclick =
+        function () {
+          clearModalForm();
+          highlightCard(null);
+        };
+
+      // Add button
+      modalFormContainer.querySelector("#addContentBtn").onclick = function () {
+        let contentHtml = "";
+        if (type === "timeCapsuleAdd-text") {
+          const val = modalFormContainer
+            .querySelector("#capsuleContentText")
+            .value.trim();
+          if (val) {
+            contentHtml = `<div class="capsule-content-item my-2 p-3 rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 text-[#000000] dark:text-gray-200 shadow-sm flex items-center justify-between gap-2">
+  <span class="flex items-center gap-2">
+    <i class="bi bi-card-text text-xl text-[#ffd036]"></i>
+    <span>${val.replace(/</g, "&lt;")}</span>
+  </span>
+  <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
+</div>`;
+          }
+        } else if (type === "timeCapsuleAdd-image") {
+          const fileInput = modalFormContainer.querySelector(
+            "#capsuleContentImage"
+          );
+          if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              contentHtml = `<div class="capsule-content-item my-2 p-3 rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 text-[#000000] dark:text-gray-200 shadow-sm flex items-center justify-between gap-2">
+  <span class="flex items-center gap-2">
+    <i class="bi bi-image text-xl text-[#ffd036]"></i>
+    <img src="${e.target.result}" alt="Image" class="max-h-24 rounded" />
+  </span>
+  <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
+</div>`;
+              contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
+            };
+            reader.readAsDataURL(file);
+          }
+        } else if (type === "timeCapsuleAdd-file") {
+          const fileInput = modalFormContainer.querySelector(
+            "#capsuleContentFile"
+          );
+          if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            contentHtml = `<div class="capsule-content-item my-2 p-3 rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 text-[#000000] dark:text-gray-200 shadow-sm flex items-center justify-between gap-2">
+  <span class="flex items-center gap-2">
+    <i class="bi bi-file-earmark text-xl text-[#ffd036]"></i>
+    <span>${file.name}</span>
+  </span>
+  <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
+</div>`;
+          }
+        } else if (type === "timeCapsuleAdd-link") {
+          const val = modalFormContainer
+            .querySelector("#capsuleContentLink")
+            .value.trim();
+          if (val) {
+            contentHtml = `<div class="capsule-content-item my-2 p-3 rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 text-[#000000] dark:text-gray-200 shadow-sm flex items-center justify-between gap-2">
+  <span class="flex items-center gap-2">
+    <i class="bi bi-link-45deg text-xl text-[#ffd036]"></i>
+    <a href="${val.replace(
+      /"/g,
+      "&quot;"
+    )}" target="_blank" class="underline break-all">${val.replace(
+              /</g,
+              "&lt;"
+            )}</a>
+  </span>
+  <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
+</div>`;
+          }
+        }
+        if (contentHtml && type !== "timeCapsuleAdd-image") {
+          contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
+        }
+        clearModalForm();
+        closeDialogWithFade();
+      };
+    }
+
+    // Open modal
+    if (openBtn && dialog) {
+      openBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (typeof dialog.showModal === "function") {
+          dialog.showModal();
+        } else {
+          dialog.setAttribute("open", "open");
+        }
+        setTimeout(() => dialog.classList.add("visible"), 10);
+      });
+    }
+
+    // Card option click
+    cardOptions.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        showContentForm(this.getAttribute("data-card"));
+      });
+    });
+
+    // Dialog close buttons
+    dialog?.querySelectorAll('[command="close"]').forEach((btn) => {
+      btn.addEventListener("click", closeDialogWithFade);
+    });
+
+    // Dialog close event
+    dialog.addEventListener("close", function () {
+      highlightCard(null);
+      dialog.classList.remove("visible");
+    });
+
+    // Capsule content delete (event delegation)
+    contentsHolder.addEventListener("click", function (e) {
+      if (e.target.classList.contains("delete-content-btn")) {
+        e.target.closest(".capsule-content-item").remove();
+      }
+    });
+  });
+</script>
+
+<!-- Dialog fade in -->
+<style>
+  .fade-dialog {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: none;
+  }
+  .fade-dialog[open] {
+    display: block;
+  }
+  .fade-dialog.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+
+{% endblock %}
