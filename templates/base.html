@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %} | TimeTrove</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+      };
+    </script>
+  </head>
+  <body
+    class="min-h-screen flex flex-col transition-colors duration-300 bg-[#ffffff] dark:bg-[#212121]"
+  >
+    <!-- Navbar -->
+    <nav
+      class="m-4 w-[70rem] mx-auto bg-[#ebebeb] dark:bg-[#1c1c1c] rounded-2xl px-6 py-3 flex items-center justify-between"
+      style="box-shadow: 0 0 15px rgba(0, 0, 0, 0.1)"
+    >
+      <div class="w-8"></div>
+
+      <!-- Links -->
+      <div class="flex items-center space-x-6">
+        <a
+          href="/"
+          class="text-gray-700 dark:text-gray-300 hover:text-[#ffd036] dark:hover:text-[#ffd036] font-bold transition"
+          >Home</a
+        >
+        <a
+          href="/faq"
+          class="text-gray-700 dark:text-gray-300 hover:text-[#ffd036] dark:hover:text-[#ffd036] font-bold transition"
+          >FAQ</a
+        >
+        <a
+          href="https://github.com/sebcun/TimeTrove/"
+          target="_blank"
+          class="text-gray-700 dark:text-gray-300 hover:text-[#ffd036] dark:hover:text-[#ffd036] font-bold transition"
+          >GitHub</a
+        >
+      </div>
+
+      <!-- Theme Toggle -->
+      <button
+        id="theme-toggle"
+        class="p-2 rounded-full bg-[#ebebeb] dark:bg-[#1c1c1c] hover:bg-[#ffffff] dark:hover:bg-[#212121] transition"
+        aria-label="Toggle dark mode"
+      >
+        <svg
+          id="icon-sun"
+          class="w-5 h-5 hidden"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.05l-.71-.71M12 7a5 5 0 100 10 5 5 0 000-10z"
+          />
+        </svg>
+        <svg
+          id="icon-moon"
+          class="w-5 h-5 hidden"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
+          />
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-16">
+      {% block content %} {% endblock %}
+    </main>
+
+    <footer class="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+      <a href="https://github.com/sebcun/TimeTrove/" target="_blank"
+        >&copy; 2025 TimeTrove. All rights reserved.</a
+      >
+    </footer>
+
+    <script src="/static/theme.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const isDark = document.documentElement.classList.contains("dark");
+        document.getElementById("icon-sun").style.display = isDark
+          ? "block"
+          : "none";
+        document.getElementById("icon-moon").style.display = isDark
+          ? "none"
+          : "block";
+      });
+    </script>
+  </body>
+</html>

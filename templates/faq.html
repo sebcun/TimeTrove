@@ -1,0 +1,117 @@
+{% extends 'base.html' %} {% block title %}FAQ{% endblock %} {% block content %}
+<h1
+  class="text-4xl font-extrabold mb-8 text-center text-[#000000] dark:text-gray-300"
+>
+  Frequently Asked Questions
+</h1>
+<!-- Styling -->
+<style>
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s;
+    padding-bottom: 0;
+  }
+  .faq-answer.open {
+    max-height: 500px;
+    padding-bottom: 1rem;
+  }
+</style>
+
+<!-- FAQs -->
+<div class="w-[70rem] mx-auto space-y-4">
+  <!-- What is TimeTrove? -->
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <button
+      type="button"
+      class="w-full flex justify-between items-center px-6 py-4 text-lg font-semibold text-left text-gray-800 dark:text-gray-200 focus:outline-none faq-toggle"
+    >
+      What is TimeTrove?
+      <svg
+        class="w-5 h-5 transition-transform duration-200 faq-arrow"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </button>
+    <div class="faq-answer px-6 text-gray-600 dark:text-gray-300">
+      TimeTrove is an online time capsule that lets you securely store your most
+      important memories, stories, photos, and messages—saving them for yourself
+      and future generations to revisit and cherish.
+    </div>
+  </div>
+
+  <!-- FAQ Item 2 -->
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <button
+      type="button"
+      class="w-full flex justify-between items-center px-6 py-4 text-lg font-semibold text-left text-gray-800 dark:text-gray-200 focus:outline-none faq-toggle"
+    >
+      How do I create a time capsule?
+      <svg
+        class="w-5 h-5 transition-transform duration-200 faq-arrow"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </button>
+    <div class="faq-answer px-6 text-gray-600 dark:text-gray-300">
+      Simply click the "Start Preserving" button on the homepage and follow the
+      prompts to add your story, photo, or message.
+    </div>
+  </div>
+
+  <!-- FAQ Item 3 -->
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <button
+      type="button"
+      class="w-full flex justify-between items-center px-6 py-4 text-lg font-semibold text-left text-gray-800 dark:text-gray-200 focus:outline-none faq-toggle"
+    >
+      Is my data private and secure?
+      <svg
+        class="w-5 h-5 transition-transform duration-200 faq-arrow"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </button>
+    <div class="faq-answer px-6 text-gray-600 dark:text-gray-300">
+      All time capsules are encrypted automatically once created. There is no
+      way of deleting a time capsule, or viewing the contents until the timer
+      has elapsed.
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".faq-toggle").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const answer = this.nextElementSibling;
+      const arrow = this.querySelector(".faq-arrow");
+      answer.classList.toggle("open");
+      arrow.classList.toggle("rotate-180");
+    });
+  });
+</script>
+{% endblock %}
