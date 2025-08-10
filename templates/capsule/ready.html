@@ -1,7 +1,7 @@
 <h1
   class="text-4xl md:text-6xl font-extrabold mb-1 text-center text-[#ffd036] dark:text-[#ffd036]"
 >
-  {{CAPSULENAME}}
+  {{ CAPSULENAME }}
 </h1>
 <h6
   class="text-lg md:text-lg font-medium mb-1 text-center text-[#000000] dark:text-gray-300"
@@ -20,10 +20,64 @@
   ></span>
 </h6>
 <h1
-  class="text-l md:text-l font-medium mb-6 text-center text-[#000000] dark:text-gray-300 mx-14"
+  class="text-l md:text-l font-medium mb-3 text-center text-[#000000] dark:text-gray-300 mx-14"
 >
-  {{CAPSULEDESCRIPTION}}
+  {{ CAPSULEDESCRIPTION }}
 </h1>
+
+<h1
+  class="text-2xl md:text-2xl font-bold mb-3 text-center text-[#000000] dark:text-gray-300 mx-14"
+>
+  TIME CAPSULE CONTENTS
+</h1>
+
+{% for item in CAPSULECONTENTS %} {% if item.type == 'text' %}
+<div class="mb-3">
+  <div class="w-full">
+    <div
+      class="text-center block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+    >
+      {{item.value}}
+    </div>
+  </div>
+</div>
+{% elif item.type == 'link' %}
+<div class="mb-3">
+  <div class="w-full">
+    <a
+      href="{{item.value}}"
+      target="_blank"
+      class="text-center block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+      ><i class="bi bi-link-45deg text-[#000000] dark:text-gray-200"></i>
+      {{item.value}}
+    </a>
+  </div>
+</div>
+{% elif item.type == 'file' %}
+<div class="mb-3">
+  <div class="w-full">
+    <a
+      href="/download/{{CAPSULEID}}/{{item.serverPath}}"
+      target="_blank"
+      class="text-center block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+      ><i class="bi bi-file-earmark text-[#000000] dark:text-gray-200"></i>
+      {{item.value}}
+    </a>
+  </div>
+</div>
+{% elif item.type == 'image' %}
+<div class="mb-3">
+  <div class="w-full">
+    <a
+      href="/download/{{CAPSULEID}}/{{item.serverPath}}"
+      target="_blank"
+      class="text-center block w-full rounded-md bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-700 px-3 py-1.5 pr-14 text-base text-[#000000] dark:text-gray-200 outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 transition"
+      ><i class="bi bi-image text-[#000000] dark:text-gray-200"></i>
+      {{item.value}}
+    </a>
+  </div>
+</div>
+{% endif %} {% endfor %}
 
 <script>
   function formatUnixTimestamp(ts) {

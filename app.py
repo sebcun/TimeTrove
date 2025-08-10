@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, send_from_directory
 import os, json, uuid, pytz
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -39,10 +39,15 @@ def create():
                 fileKey = f"{content['type']}_{idx}"
                 file = request.files.get(fileKey)
                 if file:
-                    filename = secure_filename(file.filename)
-                    savePath = os.path.join(UPLOAD_FOLDER, filename)
+                    originalFileName = secure_filename(file.filename)
+                    unique_id = str(uuid.uuid4())
+                    ext = os.path.splitext(originalFileName)[1]
+                    uniqueFileName = f"{unique_id}{ext}"
+                    savePath = os.path.join(UPLOAD_FOLDER, uniqueFileName)
                     file.save(savePath)
-                    content['value'] = savePath
+                    content['serverPath'] = uniqueFileName 
+                    content['value'] = originalFileName
+
         capsule = {
             "id": capsuleID,
             "name": capsuleName,
@@ -79,9 +84,29 @@ def viewCapsule(capsuleID):
     
     isReady = capsule['readyAt'] <= int(time())
     if isReady:
-        return render_template('capsule/base.html', NOTFOUND=False, READY=True, CAPSULENAME=capsule['name'], CAPSULEDESCRIPTION=capsule['description'], CAPSULECONTENTS=capsule['contents'], READYAT=capsule['readyAt'], CREATEDAT=capsule['createdAt'])
+        return render_template('capsule/base.html', NOTFOUND=False, READY=True, CAPSULEID=capsule['id'], CAPSULENAME=capsule['name'], CAPSULEDESCRIPTION=capsule['description'], CAPSULECONTENTS=capsule['contents'], READYAT=capsule['readyAt'], CREATEDAT=capsule['createdAt'])
     else:
         return render_template('capsule/base.html', NOTFOUND=False, READY=False, READYAT=capsule['readyAt'])
+
+@app.route('/download/<capsuleID>/<filePath>')
+def download(capsuleID, filePath):
+    if not os.path.exists(CAPSULES_JSON):
+        return "Capsule not found", 404
+    with open(CAPSULES_JSON, 'r', encoding='utf-8') as f:
+        data=json.load(f)
+
+    # Find Capsule
+    capsule = next((c for c in data if c['id']==capsuleID), None)
+    if not capsule:
+        return render_template('capsule/base.html', NOTFOUND=True)
+    
+    content = next((ct for ct in capsule['contents'] if ct.get('serverPath') == filePath), None)
+    if not content:
+        return "File not found", 404
+    
+    originalFileName = content.get('value', filePath)
+
+    return send_from_directory(UPLOAD_FOLDER, filePath, as_attachment=True, download_name=originalFileName)
 
 
 if __name__ == '__main__':
