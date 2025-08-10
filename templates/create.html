@@ -6,7 +6,12 @@
   Create a new <span class="text-[#ffd036]">Time Capsule</span>
 </h1>
 
-<form class="w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto">
+<form
+  id="capsuleForm"
+  enctype="multipart/form-data"
+  method="POST"
+  class="w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto"
+>
   <!-- Capsule Details -->
   <h1
     class="text-xl font-extrabold text-center text-[#000000] dark:text-gray-300"
@@ -226,7 +231,7 @@
   }
 </style>
 
-<!-- Optimized: Default Date (+1 from today) and Capsule Content Modal -->
+<!-- Default Date (+1 from today) and Capsule Content Modal -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Set default date to tomorrow
@@ -364,6 +369,7 @@
   </span>
   <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
 </div>`;
+            contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
           }
         } else if (type === "timeCapsuleAdd-image") {
           const fileInput = modalFormContainer.querySelector(
@@ -381,6 +387,11 @@
   <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
 </div>`;
               contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
+              // Attach fileRef to the last inserted image
+              const lastImg = contentsHolder.querySelector(
+                ".capsule-content-item:last-child img"
+              );
+              if (lastImg) lastImg.fileRef = file;
             };
             reader.readAsDataURL(file);
           }
@@ -397,6 +408,12 @@
   </span>
   <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
 </div>`;
+            contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
+            // Attach fileRef to the last inserted span
+            const lastSpan = contentsHolder.querySelector(
+              ".capsule-content-item:last-child span span"
+            );
+            if (lastSpan) lastSpan.fileRef = file;
           }
         } else if (type === "timeCapsuleAdd-link") {
           const val = modalFormContainer
@@ -416,10 +433,8 @@
   </span>
   <button type="button" class="delete-content-btn ml-2 px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-700 transition">Delete</button>
 </div>`;
+            contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
           }
-        }
-        if (contentHtml && type !== "timeCapsuleAdd-image") {
-          contentsHolder.insertAdjacentHTML("beforeend", contentHtml);
         }
         clearModalForm();
         closeDialogWithFade();
@@ -461,6 +476,104 @@
     contentsHolder.addEventListener("click", function (e) {
       if (e.target.classList.contains("delete-content-btn")) {
         e.target.closest(".capsule-content-item").remove();
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const createBtn = document.getElementById("createTimeCapsuleBtn");
+    createBtn.addEventListener("click", async function () {
+      const capsuleName = document.getElementById("capsuleName").value.trim();
+      let capsuleDescription = document
+        .getElementById("capsuleDescription")
+        .value.trim();
+      capsuleDescription = capsuleDescription.replace(/^\s*[\r\n]/gm, "");
+      const capsuleTime = document.getElementById("capsuleTime").value;
+      const capsuleDate = document.getElementById("capsuleDate").value;
+
+      console.log(capsuleTime);
+
+      if (!capsuleName) {
+        alert("Please enter a capsule name to submit!");
+        return;
+      }
+      if (!capsuleTime) {
+        alert("Please enter a time to open the capsule to submit!");
+        return;
+      }
+      if (!capsuleDate) {
+        alert("Please enter a date to open the capsule to submit!");
+        return;
+      }
+
+      const capsuleContents = [];
+      const filesToUpload = [];
+      document
+        .querySelectorAll("#capsuleContentsHolder .capsule-content-item")
+        .forEach((item, idx) => {
+          // <-- add idx here
+          const icon = item.querySelector("i");
+          let type = "";
+          if (icon.classList.contains("bi-card-text")) type = "text";
+          else if (icon.classList.contains("bi-image")) type = "image";
+          else if (icon.classList.contains("bi-file-earmark")) type = "file";
+          else if (icon.classList.contains("bi-link-45deg")) type = "link";
+
+          let value = "";
+          if (type === "text") {
+            value = item.querySelector("span span").textContent;
+            capsuleContents.push({ type, value });
+          } else if (type === "image") {
+            const img = item.querySelector("img");
+            const file = img?.fileRef;
+            if (file) {
+              filesToUpload.push({ file, idx, type: "image" });
+              capsuleContents.push({ type, value: `__image_${idx}__` });
+            }
+          } else if (type === "file") {
+            const span = item.querySelector("span span");
+            const file = span?.fileRef;
+            if (file) {
+              filesToUpload.push({ file, idx, type: "file" });
+              capsuleContents.push({ type, value: `__file_${idx}__` });
+            }
+          } else if (type === "link") {
+            value = item.querySelector("a").href;
+            capsuleContents.push({ type, value });
+          }
+        });
+      if (capsuleContents.length === 0) {
+        alert("Please enter at least 1 capsule content item to submit!");
+        return;
+      }
+
+      const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const formData = new FormData();
+      formData.append("capsuleName", capsuleName);
+      formData.append("capsuleDescription", capsuleDescription);
+      formData.append("capsuleTime", capsuleTime);
+      formData.append("capsuleDate", capsuleDate);
+      formData.append("capsuleContents", JSON.stringify(capsuleContents));
+      formData.append("userTimeZone", userTimeZone);
+      filesToUpload.forEach((obj) => {
+        formData.append(`${obj.type}_${obj.idx}`, obj.file);
+      });
+
+      try {
+        const response = await fetch("/create", {
+          method: "POST",
+          body: formData,
+        });
+        if (response.ok) {
+          const data = await response.json();
+          window.location.href = `/capsule/${data.capsuleID}`;
+        } else {
+          alert("Failed to create capsule.");
+        }
+      } catch (err) {
+        alert("Error submitting form.");
       }
     });
   });
