@@ -15,6 +15,9 @@ from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from capsule import getCapsuleBackend
 import emailUtil
+import encryption
+from cryptography.fernet import Fernet
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -23,6 +26,8 @@ load_dotenv()
 saveCapsule, loadCapsules, findCapsule, registerNotificationEmail, getAllNotifications, deleteNotification = getCapsuleBackend(
     sqlliteDB=os.getenv('SQLLITE_DB')
 )
+encrypt, decrypt = encryption.getEncryptionBackend()
+
 
 def sendEmailNow(toEmail, capsuleId):
     emailUtil.send(toEmail, capsuleId)
@@ -57,6 +62,8 @@ def startTimeTrove():
         level=logging.INFO,
         format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
     )
+
+    ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', None)
 
     @app.route('/')
     def home():
@@ -97,7 +104,14 @@ def startTimeTrove():
                             ext = os.path.splitext(originalFileName)[1]
                             uniqueFileName = f"{uniqueId}{ext}"
                             savePath = os.path.join(current_app.config['UPLOAD_FOLDER'], uniqueFileName)
-                            file.save(savePath)
+                            if ENCRYPTION_KEY:
+                                fileBytes = file.read()
+                                fernet = Fernet(ENCRYPTION_KEY.encode())
+                                encryptedBytes = fernet.encrypt(fileBytes)
+                                with open(savePath, 'wb') as f:
+                                    f.write(encryptedBytes)
+                            else:
+                                file.save(savePath)
                             content['serverPath'] = uniqueFileName
                             content['value'] = originalFileName
 
@@ -190,12 +204,28 @@ def startTimeTrove():
             return "File not found", 404
 
         originalFileName = content.get('value', filePath)
-        return send_from_directory(
-            app.config['UPLOAD_FOLDER'],
-            filePath,
-            as_attachment=True,
-            download_name=originalFileName
-        )
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filePath)
+        if ENCRYPTION_KEY:
+            from cryptography.fernet import Fernet
+            fernet = Fernet(ENCRYPTION_KEY.encode())
+            with open(file_path, 'rb') as f:
+                encryptedBytes = f.read()
+                decryptedBytes = fernet.decrypt(encryptedBytes)
+            return (
+                decryptedBytes,
+                200,
+                {
+                    'Content-Type': 'application/octet-stream',
+                    'Content-Disposition': f'attachment; filename="{originalFileName}"'
+                }
+            )
+        else:
+            return send_from_directory(
+                app.config['UPLOAD_FOLDER'],
+                filePath,
+                as_attachment=True,
+                download_name=originalFileName
+            )
 
     return app
 
