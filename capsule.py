@@ -1,6 +1,26 @@
 import os
 import json
 import sqlite3
+from dotenv import load_dotenv
+
+load_dotenv()
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', None)
+
+if ENCRYPTION_KEY:
+    from cryptography.fernet import Fernet
+    fernet = Fernet(ENCRYPTION_KEY.encode())
+
+    def encrypt(data):
+        return fernet.encrypt(data.encode()).decode()
+
+    def decrypt(data):
+        return fernet.decrypt(data.encode()).decode()
+else:
+    def encrypt(data):
+        return data
+
+    def decrypt(data):
+        return data
 
 def getCapsuleBackend(sqlliteDB=None):
     if sqlliteDB:
@@ -26,7 +46,7 @@ def getCapsuleBackend(sqlliteDB=None):
             conn = sqlite3.connect(sqlliteDB)
             conn.execute(
                 'INSERT OR REPLACE INTO capsules (id, data) VALUES (?, ?)',
-                (capsule['id'], json.dumps(capsule))
+                (capsule['id'], encrypt(json.dumps(capsule)))
             )
             conn.commit()
             conn.close()
@@ -34,7 +54,7 @@ def getCapsuleBackend(sqlliteDB=None):
         def loadCapsules():
             conn = sqlite3.connect(sqlliteDB)
             cursor = conn.execute('SELECT data FROM capsules')
-            capsules = [json.loads(row[0]) for row in cursor.fetchall()]
+            capsules = [json.loads(decrypt(row[0])) for row in cursor.fetchall()]
             conn.close()
             return capsules
 
@@ -43,7 +63,7 @@ def getCapsuleBackend(sqlliteDB=None):
             cursor = conn.execute('SELECT data FROM capsules WHERE id = ?', (capsule_id,))
             row = cursor.fetchone()
             conn.close()
-            return json.loads(row[0]) if row else None
+            return json.loads(decrypt(row[0])) if row else None
         
         def registerNotificationEmail(capsuleID, email, readyAt):
             conn = sqlite3.connect(sqlliteDB)
@@ -75,17 +95,17 @@ def getCapsuleBackend(sqlliteDB=None):
         def saveCapsule(capsule):
             if os.path.exists('capsules.json'):
                 with open('capsules.json', 'r', encoding='utf-8') as f:
-                    data = json.load(f)
+                    data = json.loads(decrypt(f.read()))
             else:
                 data = []
             data.append(capsule)
             with open('capsules.json', 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.write(encrypt(json.dumps(data, indent=2, ensure_ascii=False)))
         def loadCapsules():
             if not os.path.exists('capsules.json'):
                 return []
             with open('capsules.json', 'r', encoding='utf-8') as f:
-                return json.load(f)
+                return json.loads(decrypt(f.read()))
         def findCapsule(capsule_id):
             capsules = loadCapsules()
             return next((c for c in capsules if c['id'] == capsule_id), None)
@@ -93,29 +113,29 @@ def getCapsuleBackend(sqlliteDB=None):
             notificationFile = 'notifications.json'
             if os.path.exists(notificationFile):
                 with open(notificationFile, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
+                    data = json.loads(decrypt(f.read()))
             else:
                 data = []
             if not any(n['capsule_id'] == capsule_id and n['email'] == email for n in data):
                 data.append({'capsule_id': capsule_id, 'email': email, 'readyAt': readyAt})
             with open(notificationFile, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.write(encrypt(json.dumps(data, indent=2, ensure_ascii=False)))
         def getAllNotifications():
             notificationFile = 'notifications.json'
             if not os.path.exists(notificationFile):
                 return []
             with open(notificationFile, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                return json.loads(decrypt(f.read()))
         def deleteNotification(notificationID):
             notificationFile = 'notifications.json'
             if not os.path.exists(notificationFile):
                 return
             with open(notificationFile, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                data = json.loads(decrypt(f.read()))
             if 0 <= notificationID < len(data):
                 data.pop(notificationID)
                 with open(notificationFile, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=2, ensure_ascii=False)
+                    f.write(encrypt(json.dumps(data, indent=2, ensure_ascii=False)))
 
     return (
         saveCapsule,
