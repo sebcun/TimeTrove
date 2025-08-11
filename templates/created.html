@@ -1,0 +1,134 @@
+{% extends 'base.html' %} {% block title %}Capsule{% endblock %} {% block
+content %}
+<h1
+  class="text-4xl md:text-6xl font-extrabold mb-6 text-center text-[#000000] dark:text-gray-300"
+>
+  Capsule Opens In
+</h1>
+<h1
+  class="text-4xl md:text-6xl font-extrabold mb-6 text-center text-[#ffd036] dark:text-[#ffd036]"
+  data-readyat="{{ READYAT }}"
+  id="countdown"
+>
+  Loading...
+</h1>
+<button
+  type="button"
+  onclick="copyLink()"
+  class="px-6 py-3 rounded-lg bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition mb-3"
+>
+  Copy Link
+</button>
+<button
+  type="button"
+  onclick="sendEmail()"
+  class="px-6 py-3 rounded-lg bg-[#ffd036] text-gray-900 font-extrabold shadow hover:bg-[#8c762d] transition"
+>
+  Send Email On Open
+</button>
+<script>
+  function sendEmail() {
+    const email = prompt(
+      "Enter the email to send to when this capsule is opened:"
+    );
+
+    if (email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (emailPattern.test(email)) {
+        fetch(`/capsule/{{ CAPSULEID }}/sendemail`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              alert(
+                `${email} will receive an email when this capsule is opened.`
+              );
+            } else {
+              alert("Failed to register email.");
+            }
+          })
+          .catch(() => alert("Failed to register email."));
+      } else {
+        alert("That is not a valid email address.");
+      }
+    }
+  }
+
+  function copyLink() {
+    const websiteURL = window.location.origin;
+    navigator.clipboard
+      .writeText(`${websiteURL}/capsule/{{ CAPSULEID }}`)
+      .then(() => {
+        alert("Copied to clipboard!");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Failed to copy.");
+      });
+  }
+  function formatTime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const minutes = Math.floor(seconds / 60);
+    seconds %= 60;
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  function startCountdown() {
+    const countdownElem = document.getElementById("countdown");
+    if (!countdownElem) return;
+
+    const readyAt = parseInt(countdownElem.dataset.readyat) * 1000;
+    const now = Date.now();
+    const totalSeconds = Math.max(0, Math.floor((readyAt - now) / 1000));
+
+    const animationDuration = 6000;
+    const frameRate = 30;
+    const totalFrames = Math.floor((animationDuration / 1000) * frameRate);
+    let currentFrame = 0;
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 5);
+    }
+
+    function animateUp() {
+      currentFrame++;
+      const linearProgress = Math.min(1, currentFrame / totalFrames);
+      const easedProgress = easeOutCubic(linearProgress);
+      const displaySeconds = Math.floor(totalSeconds * easedProgress);
+      countdownElem.textContent = formatTime(displaySeconds);
+      if (linearProgress < 1) {
+        requestAnimationFrame(animateUp);
+      } else {
+        startRealCountdown();
+      }
+    }
+
+    function startRealCountdown() {
+      function updateCountdown() {
+        const now = Date.now();
+        const diff = Math.floor((readyAt - now) / 1000);
+        if (diff <= 0) {
+          countdownElem.textContent = "Capsule is ready!";
+          clearInterval(intervalId);
+          return;
+        }
+        countdownElem.textContent = formatTime(diff);
+      }
+      updateCountdown();
+      var intervalId = setInterval(updateCountdown, 1000);
+    }
+
+    animateUp();
+  }
+
+  document.addEventListener("DOMContentLoaded", startCountdown);
+</script>
+
+{% endblock %}

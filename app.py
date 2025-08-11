@@ -3,6 +3,8 @@ import json
 import uuid
 import pytz
 import logging
+import threading
+import time as pyTime
 from datetime import datetime
 from time import time
 from flask import (
@@ -12,9 +14,32 @@ from flask import (
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from capsule import getCapsuleBackend
+import emailUtil
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Initialize backend functions globally
+saveCapsule, loadCapsules, findCapsule, registerNotificationEmail, getAllNotifications, deleteNotification = getCapsuleBackend(
+    sqlliteDB=os.getenv('SQLLITE_DB')
+)
+
+def sendEmailNow(toEmail, capsuleId):
+    emailUtil.send(toEmail, capsuleId)
+
+def notificationWorker():
+    while True:
+        now = int(pyTime.time())
+        notifications = getAllNotifications()
+        for notif in notifications:
+            readyAt = notif['readyAt']
+            email = notif.get('email')
+            capsuleId = notif.get('capsuleID', notif.get('capsule_id'))
+            if readyAt <= now:
+                sendEmailNow(email, capsuleId)
+                notifId = notif.get('id', notifications.index(notif))
+                deleteNotification(notifId)
+        pyTime.sleep(10)
 
 def startTimeTrove():
     """Create and configure the Flask application."""
@@ -33,10 +58,6 @@ def startTimeTrove():
         format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
     )
 
-    saveCapsule, loadCapsules, findCapsule = getCapsuleBackend(
-        sqlite_db=os.getenv('SQLITE_DB')
-    )
-
     @app.route('/')
     def home():
         """Render the home page."""
@@ -52,7 +73,7 @@ def startTimeTrove():
         """Create a new time capsule."""
         if request.method == 'POST':
             try:
-                capsuleID = str(uuid.uuid4())
+                capsuleId = str(uuid.uuid4())
                 capsuleName = request.form.get('capsuleName')
                 capsuleDescription = request.form.get('capsuleDescription')
                 capsuleTime = request.form.get('capsuleTime')
@@ -81,7 +102,7 @@ def startTimeTrove():
                             content['value'] = originalFileName
 
                 capsule = {
-                    "id": capsuleID,
+                    "id": capsuleId,
                     "name": capsuleName,
                     "description": capsuleDescription,
                     "readyAt": unixReadyAt,
@@ -91,18 +112,18 @@ def startTimeTrove():
 
                 saveCapsule(capsule)
 
-                logging.info(f"Capsule {capsuleID} created successfully.")
-                return jsonify({"success": True, "capsuleID": capsuleID}), 200
+                logging.info(f"Capsule {capsuleId} created successfully.")
+                return jsonify({"success": True, "capsuleID": capsuleId}), 200
             except Exception as e:
                 logging.error(f"Error creating capsule: {e}")
                 return jsonify({"success": False, "error": str(e)}), 500
         else:
             return render_template('create.html')
 
-    @app.route('/capsule/<capsuleID>')
-    def viewCapsule(capsuleID):
+    @app.route('/capsule/<capsuleId>')
+    def viewCapsule(capsuleId):
         """View a specific time capsule."""
-        capsule = findCapsule(capsuleID)
+        capsule = findCapsule(capsuleId)
         if not capsule:
             return render_template('capsule/base.html', NOTFOUND=True)
         
@@ -126,11 +147,41 @@ def startTimeTrove():
                 READY=False,
                 READYAT=capsule['readyAt']
             )
+        
+    @app.route('/created/<capsuleId>')
+    def createdCapsule(capsuleId):
+        """Show the create time capsule."""
+        capsule = findCapsule(capsuleId)
+        if not capsule:
+            return render_template('capsule/base.html', NOTFOUND=True)
+        
+        isReady = capsule['readyAt'] <= int(time())
+        if isReady:
+            return redirect(f'/capsule/{capsuleId}')
+        else:
+            return render_template(
+                'created.html',
+                NOTFOUND=False,
+                READY=False,
+                READYAT=capsule['readyAt'],
+                CAPSULEID=capsuleId
+            )
+        
+    @app.route('/capsule/<capsuleId>/sendemail', methods=['POST'])
+    def sendEmail(capsuleId):
+        data = request.get_json()
+        email = data.get('email')
+        capsule = findCapsule(capsuleId)
+        if not capsule or not email:
+            return jsonify({'success': False, 'error': 'Invalid capsule or email'}), 400
+        readyAt = capsule.get('readyAt')
+        registerNotificationEmail(capsuleId, email, readyAt)
+        return jsonify({'success': True})
 
-    @app.route('/download/<capsuleID>/<filePath>')
-    def download(capsuleID, filePath):
+    @app.route('/download/<capsuleId>/<filePath>')
+    def download(capsuleId, filePath):
         """Download a file from a capsule."""
-        capsule = findCapsule(capsuleID)
+        capsule = findCapsule(capsuleId)
         if not capsule:
             return render_template('capsule/base.html', NOTFOUND=True)
 
@@ -149,6 +200,8 @@ def startTimeTrove():
     return app
 
 if __name__ == '__main__':
+    t = threading.Thread(target=notificationWorker, daemon=True)
+    t.start()
     app = startTimeTrove()
     app.run(
         host=os.getenv('FLASK_RUN_HOST', '0.0.0.0'),
